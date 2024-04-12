@@ -1,0 +1,38 @@
+TODO:
+------------------------------------------------------
+[--Feature--] See overall / positive / negative status effects
+[--Feature--] Hold attack
+[--Feature--] Hold left click
+[--Feature--] Print hotbar / inventory
+[--Feature--] Move items in inventory
+[--Feature--] Select held slot
+[--Feature--] Auto totem
+[--Feature--] Fish
+
+-------------------------------------------------------
+
+WORK-IN-PROGRESS:
+-------------------------------------------------------
+
+BUGS:
+[--NOT WORMING--] wlook shows not defined
+[--NEEDS IMPLEMENTATION--] can't change attack delay while it is working
+[--NOT WORMING--] autoeat does not work in the intended file bcs of the loop
+[--BUG--] drop moves items in the inventory to the first empty slot
+[--NOT WORMING--] heldslot needs item in slot to select it
+-------------------------------------------------------
+
+WAITING:
+[--Feature--] Auto eat settings
+[--Feature--] Discord linking
+[--Feature--] Online viewer
+[--Feature--] Pathfinding
+[--Feature--] Goto
+[--Feature--] Storage manipulation
+[--Feature--] Mine
+[--Feature--] Online client
+-------------------------------------------------------
+
+MAYBE:
+[--Feature--] PvP
+-------------------------------------------------------

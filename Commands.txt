@@ -1,0 +1,23 @@
+Kui saadad dmi ja oled lubatud kasutaja, siis see kordab, kui ei sisalda tähist $
+[] - vajalik väli
+() - vabatahtlik väli
+
+commandid: 
+$pos - dmib sõnumi kasutajale boti koordinaadid ja dimensiooni
+$look [x y] - vaatab spetsifitseeritud suunda, NB! ainult 0 ja 180 on vahetuses minecrafti omadega, komaarvud kirjutatakse punktiga
+$adduser [username] - lisab uue lubatud kasutaja
+$removeuser [username] - eemaldab lubatud kasutaja
+$autoeat [true/false] - aktiveerib auto eati või paneb kinni
+$heart - näitab boti elusi, hungeri, hapniku ja levelit
+$time - näitab aega ja kas päev
+$status - näitab kas autoeat töötab
+$toss [count] [item] (username) - viskab soovitud itemi, kui tal on neid piisavalt, saab üle stacki korraga. Nimega vaatab ta kasutaja poole enne kui viskab
+$moveitem [slot from, slot to] - liigutab ühest slotist teise asja
+$heldslot [slot] - võtab käeks selle sloti (peab asi olema, muidu hetkel ei tööta)
+$attack [true/false] (delay) - lööb selle delayga, delay on tickides ja sa pead kinni panema kui tahad delay vahetada
+$safk [true/false] - paneb korraga sisse auto eat ja auto sleep
+$panic - paneb kinni auto sleep, auto eat ja periodic attack
+
+OUT OF COMMISSION
+
+$wlook - näitap pitch ja yaw kuhu bot vaatab 
