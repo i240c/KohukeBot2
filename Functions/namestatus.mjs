@@ -22,4 +22,4 @@ async function MatchUsername(username, message) {
     }
 }
 
-export default checkUsername
+export default MatchUsername
