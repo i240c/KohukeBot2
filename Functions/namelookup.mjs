@@ -42,4 +42,4 @@ async function checkNameChange() {
 }
 
 
-export default nameChecker
+export default InputUserName
