@@ -13,6 +13,8 @@ import timeBot from './Functions/time.mjs';
 import dropBot from './Functions/toss.mjs';
 import moveitem from './Functions/moveitem.mjs';
 import heldslot from './Functions/heldslot.mjs';
+import namestatus from './Functions/namestatus.mjs';
+import checkname from './Functions/namelookup.mjs';
 //import botStatus from './Functions/status.mjs';
 import minecraftData from 'minecraft-data';
 import { createRequire } from "module";
@@ -50,7 +52,7 @@ class MCBot {
         this.initBot();
     }
 
-    // Init bot instance
+    // Initialize bot instance
     initBot() {
         global.bot = mineflayer.createBot({
             "username": this.username,
@@ -115,26 +117,35 @@ class MCBot {
 
         bot.loadPlugin(autoEat);
 
+        //Events on death
         bot.on('death', () => {
             let position = bot.entity.position;
             let deathTime = new Date();
             let deathLog = `Death at x: ${position.x}, y: ${position.y}, z: ${position.z} at ${deathTime}\n`;
+            //Ping me in chat and scream
             bot.chat("@240c &cAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA!!!");
             periodicStatus = false;
+            //Write death location and time to file
             fs.appendFile('./BotLogs/Deaths', deathLog, (err) => {
                 if (err) throw err;
-                console.log('Death location and time logged!');
+                //Send log in console
+                console.log(deathLog);
+                console.log('Death location and time logged !');
+                //Teleport to afk spot in server
                 bot.chat("/h wandafk");
             });
         });
 
+        //Events once bot joins the server
         bot.once('spawn', async () => {
             this.log(chalk.ansi256(46)(`Spawned in`));
+            //Init bot map
             mineflayerViewer(bot, { port: 6001 });
+            //chat pattern
             bot.addChatPattern('private message', /^(\w+) messages you: (.*)$/, { parse: true })
             //this.bot.autoEat.options = {startAt: 16} // peaks tegema et saab läbi commandi muuta
             //this.bot.chat("Tervist!");
-
+            //Mapil näitab joont kui bot liigub
             const path = [bot.entity.position.clone()]
             bot.on('move', () => {
                 if (path[path.length - 1].distanceTo(bot.entity.position) > 1) {
@@ -144,6 +155,7 @@ class MCBot {
             })
         });
 
+        //Võtab chatist msgd ja vaatab commandide jaoks
         bot.on('chat', async (username, message) => {
             this.chatLog(username, message);
             if (message.includes("messages you:")) {
@@ -227,6 +239,11 @@ class MCBot {
                     return
                 }
 
+                if (message_matcher[2].includes("$name")) {
+                    namestatus(message_matcher[1], message_matcher[2]);
+                    return
+                }
+                //Lülitab auto asjad välja
                 if (message_matcher[2].includes("$panic")) {
                     periodicStatus = false;
                     autoSleep = false;
@@ -234,7 +251,7 @@ class MCBot {
                     bot.whisper(username, "&cPaanitsestud! &6$kbh");
                     return
                 }
-
+                //Kui bot saadab endale siis sõnumis $kbh et ei saadaks chati
                 if ((message_matcher[2].includes("$kbh"))) {
                     return
                 }
@@ -243,7 +260,7 @@ class MCBot {
                     bot.whisper(message_matcher[1], "&cCommand not found! &6$kbh")
                     return
                 }
-
+                //Kui pole command saada sõnumina
                 else {
                     bot.chat(message_matcher[2])
                     return
@@ -258,7 +275,7 @@ class MCBot {
         //Auto eat
         //Can't get the status working outside the file
         const EventEmitter = require('events');
-
+        //Mingi kahtlane asi mis teeb et loop ei töötaks 24/7
         class Status extends EventEmitter {
             constructor() {
                 super();
@@ -266,11 +283,11 @@ class MCBot {
                 this._periodicStatus = false;
                 this._autoSleep = false;
             }
-
+            //Saab kas 
             get autoEatStatus() {
                 return this._autoEatStatus;
             }
-
+            
             set autoEatStatus(value) {
                 this._autoEatStatus = value;
                 this.emit('eatStatusChange');
@@ -284,7 +301,7 @@ class MCBot {
                 this._periodicStatus = value;
                 this.emit('attackStatusChange');
             }
-
+            
             get autoSleep() {
                 return this._autoSleep;
             }
@@ -318,7 +335,9 @@ class MCBot {
             }
 
             if (status.autoEatStatus === true) {
+                //Loopib seda koodi iga 3 sekundi tagant
                 eatIntervalId = setInterval(() => {
+                    // Kui tal hunger <= 17 ja ei maga siis sööb
                     if (bot.food <= 17 || !isSleeping) {
                         isEating = true;
                         eat(17, foodWhitelist).then(function (item) {
@@ -326,23 +345,27 @@ class MCBot {
                             isEating = false;
                         })
                     }
+                    // Kui ei saa süüa siis ei juhtu midagi
                     else {
                         return
                     }
                 }, 3000);
             }
-
+            // Perioodiline attack
             if (status.periodicStatus === true) {
                 attackIntervalId = setInterval(async () => {
+                    //Kui bot sööb siis ootab
                     if (!isEating) {
                         await attack();
                     }
                 }, msDelay);
             }
             if (status.autoSleep === true) {
-                if (!bot.time.isDay || !bot.isSleeping) {
+                //Kui öö või ta ei maga siis proovib magada, kui panin && siis ei tööta, idk miks nii tho
+                if (!bot.time.isDay && !bot.isSleeping) {
                     if (autoSleep == true) {
                         sleepIntervalId = setInterval(async () => {
+                            //Otsib voodi
                             const bed = bot.findBlock({
                                 matching: block => bot.isABed(block)
                             })
@@ -367,16 +390,18 @@ class MCBot {
 
 
 
-
+        //Funktsioon mis tegeleb ründamisega
         async function attack() {
             const entity = bot.entityAtCursor();
+            //Kui pole mobi ta ees mängib käe löömise animatsiooni
             if (!entity /*|| bot.blacklist.includes(entity.name)*/) {
                 bot.swingArm();
                 return;
             }
+            //Ründab mobi
             bot.attack(entity, true);
         }
-
+        //Söömise funktsioon, võtab kui tühi peab kõht olema ja lubatud toidud
         const eat = function (threshold, filter = []) {
             return new Promise(async function (resolve, reject) {
                 if (bot.food > threshold) console.log(`The bot was too full to eat, skipping.`); // The bot had more hunger than the threshold
@@ -390,7 +415,7 @@ class MCBot {
                 }
 
                 return resolve(items[0]);
-
+                //Info toidu kohta
                 function getItems() {
                     let foodByPoints = Object.values(bot.registry.foods).sort((a, b) => b.foodPoints - a.foodPoints); // Sort food items by foodPoints (Yes, I know about foodsByFoodPoints)
                     let filtered = filter.length ? foodByPoints.filter(i => filter.includes(i.name)) : foodByPoints; // If there's a filter use it, use foodByPoints list
@@ -402,7 +427,7 @@ class MCBot {
         }
         function handleAutoSleepCommand(username, message) {
             let sleepMessage = message.match(/^\$sleep (\w+)$/);
-            if (sleepMessage == null) { sleepMessage = message.match(/^\$safk (\w+)$/); }
+            if (sleepMessage == null) { sleepMessage = message.match(/^\$safk (\w+)$/); } //Vaatab kas sõnum on formeeritud regexi järgi
             if (sleepMessage == null) {
                 bot.whisper(username, "&cMissing argument! &6$kbh")
                 return

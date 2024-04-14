@@ -14,8 +14,8 @@ function handleLookCommand(username, message) {
         return
     }
 
-    let xyaw = (pointer[1]) * Math.PI / 180; //calculates the yaw to degrees from rad
-    let ypitch = (pointer[2]) * Math.PI / 180; //calculates the pitch to degrees from rad
+    let xyaw = - (pointer[1]) * Math.PI / 180; //calculates the yaw to degrees from rad
+    let ypitch = - (pointer[2]) * Math.PI / 180; //calculates the pitch to degrees from rad
     bot.look(xyaw, ypitch, true); // Look at the inputed place
     console.log(pointer[1], " " + pointer[2])
 }
