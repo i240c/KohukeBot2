@@ -353,12 +353,13 @@ class MCBot {
             }
             // Perioodiline attack
             if (status.periodicStatus === true) {
-                attackIntervalId = setInterval(async () => {
                     //Kui bot sööb siis ootab
                     if (!isEating) {
+                    console.log("kooe");
+                    attackIntervalId = setInterval(async () => {
                         await attack();
-                    }
-                }, msDelay);
+                    }, msDelay);
+                }
             }
             if (status.autoSleep === true) {
                 //Kui öö või ta ei maga siis proovib magada, kui panin && siis ei tööta, idk miks nii tho
@@ -534,7 +535,7 @@ class MCBot {
                 }
 
                 else {
-                    bot.whisper(username, "&5Periodic attack läks kinni!")
+                    bot.whisper(username, "&5Periodic attack läks kinni! &6$kbh")
                     periodicStatus = false;
                     status.periodicStatus = false;
                 }
