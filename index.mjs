@@ -108,7 +108,7 @@ class MCBot {
         });
 
         let autoEatStatus = false;
-        let periodicStatus = false;
+        let periodicAttackStatus = false;
         let isEating = false;
         let autoSleep = false;
         let delay;
@@ -124,7 +124,7 @@ class MCBot {
             let deathLog = `Death at x: ${position.x}, y: ${position.y}, z: ${position.z} at ${deathTime}\n`;
             //Ping me in chat and scream
             bot.chat("@240c &cAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA!!!");
-            periodicStatus = false;
+            periodicAttackStatus = false;
             //Write death location and time to file
             fs.appendFile('./BotLogs/Deaths', deathLog, (err) => {
                 if (err) throw err;
@@ -245,7 +245,7 @@ class MCBot {
                 }
                 //Lülitab auto asjad välja
                 if (message_matcher[2].includes("$panic")) {
-                    periodicStatus = false;
+                    periodicAttackStatus = false;
                     autoSleep = false;
                     autoEatStatus = false;
                     bot.whisper(username, "&cPaanitsestud! &6$kbh");
@@ -268,7 +268,7 @@ class MCBot {
             }
         });
 
-        
+
 
         let isSleeping = false;
 
@@ -287,7 +287,7 @@ class MCBot {
             get autoEatStatus() {
                 return this._autoEatStatus;
             }
-            
+
             set autoEatStatus(value) {
                 this._autoEatStatus = value;
                 this.emit('eatStatusChange');
@@ -301,7 +301,7 @@ class MCBot {
                 this._periodicStatus = value;
                 this.emit('attackStatusChange');
             }
-            
+
             get autoSleep() {
                 return this._autoSleep;
             }
@@ -352,17 +352,22 @@ class MCBot {
                 }, 3000);
             }
             // Perioodiline attack
-            if (status.periodicStatus === true) {
-                attackIntervalId = setInterval(async () => {
-                    //Kui bot sööb siis ootab
-                    if (!isEating) {
-                        await attack();
-                    }
-                }, msDelay);
-            }
+            /* if (status.periodicStatus === true) {
+                 console.log("t");
+                 attackIntervalId = setInterval(async () => {
+                     //Kui bot sööb siis ootab
+                     if (!isEating) {
+                         console.log("g");
+                         await attack();
+                     }
+                     else {
+                         return
+                     }
+                 }, msDelay);
+             }*/
             if (status.autoSleep === true) {
                 //Kui öö või ta ei maga siis proovib magada, kui panin && siis ei tööta, idk miks nii tho
-                if (!bot.time.isDay && !bot.isSleeping) {
+                if (!bot.time.isDay && !bot.isSleeping || !bot.isSleeping && bot.thunderState > 0) {
                     if (autoSleep == true) {
                         sleepIntervalId = setInterval(async () => {
                             //Otsib voodi
@@ -392,13 +397,16 @@ class MCBot {
 
         //Funktsioon mis tegeleb ründamisega
         async function attack() {
+            console.log("e");
             const entity = bot.entityAtCursor();
             //Kui pole mobi ta ees mängib käe löömise animatsiooni
             if (!entity /*|| bot.blacklist.includes(entity.name)*/) {
+                console.log("d");
                 bot.swingArm();
                 return;
             }
             //Ründab mobi
+            console.log("f");
             bot.attack(entity, true);
         }
         //Söömise funktsioon, võtab kui tühi peab kõht olema ja lubatud toidud
@@ -494,7 +502,7 @@ class MCBot {
         }
 
         function handleStatusCommand(username) {
-            bot.whisper(username, `&5Auto eat status: &6${autoEatStatus} &5Periodic attack status: &6${periodicStatus} &5Delay: &6${delay} &5Auto sleep: &6${autoSleep} &6$kbh`);
+            bot.whisper(username, `&5Auto eat status: &6${autoEatStatus} &5Periodic attack status: &6${periodicAttackStatus} &5Delay: &6${delay} &5Auto sleep: &6${autoSleep} &6$kbh`);
         }
 
         function handlePeriodicAttackCommand(username, message) {
@@ -518,28 +526,39 @@ class MCBot {
             }
 
             if (["true", "enable", "t", "yes"].includes(attackValue[1])) {
-                if (periodicStatus == true) {
+                if (periodicAttackStatus == true) {
                     bot.whisper(username, "&cPeriodic attack juba töötab! &6$kbh");
                 }
                 else {
                     bot.whisper(username, "&5Periodic attack hakkas tööle! &6$kbh");
-                    periodicStatus = true;
+                    periodicAttackStatus = true;
                     status.periodicStatus = true;
                 }
             }
 
             else if (["false", "disable", "f", "no"].includes(attackValue[1])) {
-                if (periodicStatus == false) {
+                if (periodicAttackStatus == false) {
                     bot.whisper(username, "&cPeriodic attack on juba kinni! &6$kbh")
                 }
 
                 else {
                     bot.whisper(username, "&5Periodic attack läks kinni!")
-                    periodicStatus = false;
+                    periodicAttackStatus = false;
                     status.periodicStatus = false;
                 }
             }
         }
+
+        while (periodicStatus == true) {
+            if (!isEating) {
+                console.log("g");
+                await attack();
+            }
+            else {
+                return
+            }
+            sleep(msDelay);
+        };
 
         bot.on('error', async (err) => {
             // Connection error

@@ -15,6 +15,7 @@ WORK-IN-PROGRESS:
 -------------------------------------------------------
 
 BUGS:
+[--BUG--] Periodic attack on fucking katki!
 [--NOT WORMING--] wlook shows not defined
 [--NEEDS IMPLEMENTATION--] can't change attack delay while it is working
 [--NOT WORMING--] autoeat does not work in the intended file bcs of the loop
